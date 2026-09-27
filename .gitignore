@@ -1,0 +1,28 @@
+tmp/
+session/
+.gradle/
+build/
+local.properties
+*.iml
+.idea/
+.kotlin/
+.DS_Store
+captures/
+.cxx/
+*.hprof
+*.jks
+*.keystore
+key.properties
+.capture/
+
+# local build entry point
+build.sh
+
+# git worktree scratch
+.worktrees/
+t*.log
+
+# Room writes a JSON schema per database version on every build. This app has
+# never shipped a released build, so no user holds an older database and there is
+# nothing to migrate from. The schemas are build output, not source.
+app/schemas/

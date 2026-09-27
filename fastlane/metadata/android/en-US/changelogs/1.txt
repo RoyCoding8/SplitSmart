@@ -1,0 +1,1 @@
+First release: groups, four split modes, simplified-debt settlements, recurring templates that generate due expenses automatically, CSV/JSON export and backup/restore, exchange rates, balance widget, dark mode.

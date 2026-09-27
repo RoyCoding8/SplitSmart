@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="add-expense"
+        android:enabled="true"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:shortcutShortLabel="@string/shortcut_expense"
+        android:shortcutLongLabel="@string/shortcut_expense_long">
+        <intent
+            android:action="com.splitsmart.ADD_EXPENSE"
+            android:targetPackage="com.splitsmart"
+            android:targetClass="com.splitsmart.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="add-group"
+        android:enabled="true"
+        android:icon="@android:drawable/ic_menu_add"
+        android:shortcutShortLabel="@string/shortcut_group"
+        android:shortcutLongLabel="@string/shortcut_group_long">
+        <intent
+            android:action="com.splitsmart.ADD_GROUP"
+            android:targetPackage="com.splitsmart"
+            android:targetClass="com.splitsmart.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="search"
+        android:enabled="true"
+        android:icon="@android:drawable/ic_menu_search"
+        android:shortcutShortLabel="@string/shortcut_search"
+        android:shortcutLongLabel="@string/shortcut_search_long">
+        <intent
+            android:action="com.splitsmart.OPEN_SEARCH"
+            android:targetPackage="com.splitsmart"
+            android:targetClass="com.splitsmart.MainActivity" />
+    </shortcut>
+</shortcuts>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SplitSmart</string>
+    <string name="shortcut_expense">New expense</string>
+    <string name="shortcut_expense_long">Add an expense to the last opened group</string>
+    <string name="shortcut_group">New group</string>
+    <string name="shortcut_group_long">Create a group or add a friend</string>
+    <string name="shortcut_search">Search</string>
+    <string name="shortcut_search_long">Search expenses and groups</string>
+    <string name="widget_label">SplitSmart balance</string>
+    <string name="widget_desc">Your outstanding balances across groups</string>
+</resources>

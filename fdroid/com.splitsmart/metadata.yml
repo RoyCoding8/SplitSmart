@@ -1,0 +1,46 @@
+Categories:
+  - Finance
+  - Productivity
+
+Description: |
+  SplitSmart is an offline expense splitting app. It keeps a running record
+  of who paid for what, works out who owes whom, and settles it up in the
+  fewest possible transfers.
+
+  Create a group, add the people in it, and record expenses as they
+  happen. Four split types are supported: equal, exact amounts, percent,
+  and weighted shares. Multi-payer bills, itemised receipts with tip and
+  tax, and recurring templates are all handled natively.
+
+  Everything is stored on the device. There is no account, no network
+  call, and no analytics. Backup produces a single JSON file you can keep
+  wherever you like and restore from any device.
+
+  Settlement converts across currencies using rates you enter yourself. If
+  an expense is in a currency with no rate, the app names that currency
+  rather than showing a converted figure it cannot stand behind.
+
+BuildType: gradle
+
+Changelog: v1.0.0 — First release. Groups, expenses with four split types,
+  multi-payer and itemised bills, recurring templates, comments, per-member
+  balances, minimal-transfer settle-up, foreign-currency rates, offline
+  backup and restore, and a home-screen widget.
+
+License: Apache-2.0
+
+Repo: https://github.com/RoyCoding8/SplitSmart.git
+Maintainer: RoyCoding8
+
+Name: SplitSmart
+Summary: Offline expense splitting with minimal-transfer settle-up.
+
+Source: https://github.com/RoyCoding8/SplitSmart
+
+UpdateCheckMode: Tags
+Updates:
+  - Version: 1.0.0
+    Code: 1
+    Commit: v1.0.0
+
+Website: https://github.com/RoyCoding8/SplitSmart

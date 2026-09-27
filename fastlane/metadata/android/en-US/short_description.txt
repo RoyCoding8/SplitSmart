@@ -1,0 +1,1 @@
+Offline expense splitting with fair shares and fewest-transfer settlements

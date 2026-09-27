@@ -1,0 +1,15 @@
+SplitSmart is an offline-first expense splitter. Create a group for a trip, a flat, or a dinner party, record expenses as they happen, and let the app work out who owes whom. Settlement uses a simplified debt plan, so the whole group pays up with as few transfers as possible.
+
+Everything stays on your device. SplitSmart has no accounts, no cloud sync, and no internet permission, so it cannot send your data anywhere. Back up and restore your full data as JSON whenever you like, or export a group to CSV.
+
+Highlights:
+
+- Four split modes: equal, exact amounts, percentages, and shares, with participant subsets and a live preview of every share
+- Simplified debt settlement with a raw/simplified toggle, plus partial and full settlements
+- Groups support per-group currencies with manual exchange rates, and a per-group identity for yourself
+- Recurring expense templates for regular costs, which generate their due expenses automatically
+- Optional bill and settle-up reminders, delivered by a background worker
+- History search with category filters
+- Home-screen balance widget and app shortcuts
+
+SplitSmart is free software under the Apache License 2.0.

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="108" height="108" role="img" aria-label="SplitSmart">
+  <title>SplitSmart</title>
+  <circle cx="54" cy="54" r="54" fill="#2E7D32"/>
+  <g fill="#FFFFFF">
+    <path d="M 54.0,54.0 L 29.1,37.2 A 30,30 0 0,1 78.9,37.2 Z"/>
+    <path d="M 54.0,54.0 L 81.0,40.8 A 30,30 0 0,1 56.1,83.9 Z"/>
+    <path d="M 54.0,54.0 L 51.9,83.9 A 30,30 0 0,1 27.0,40.8 Z"/>
+  </g>
+</svg>
