@@ -104,8 +104,8 @@ RepoType: git
 Repo: https://github.com/RoyCoding8/SplitSmart
 
 Builds:
-  - versionName: '1.0.0'
-    versionCode: 1
+  - versionName: '1.0.1'
+    versionCode: 2
     # Full 40-character commit hash from `git rev-parse HEAD`, not a tag.
     commit: 0000000000000000000000000000000000000000
     subdir: app
@@ -114,8 +114,8 @@ Builds:
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '1.0.0'
-CurrentVersionCode: 1
+CurrentVersion: '1.0.1'
+CurrentVersionCode: 2
 ```
 
 `gradle: [yes]` tells F-Droid to run `assembleRelease` with no product flavors, which matches the single `:app` module. `UpdateCheckMode: Tags` makes F-Droid look for a new `v*` tag on every check, so a later release is picked up without editing this file.

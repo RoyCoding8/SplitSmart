@@ -5,13 +5,13 @@
   Create groups, record expenses with equal, exact, percent, or shares splits,<br>
   then settle up with the fewest possible transfers.</p>
   <p>
-    <img src="docs/badges/release.svg" width="96" height="20" alt="release v1.0.0">
+    <img src="docs/badges/release.svg" width="96" height="20" alt="release v1.0.1">
     <img src="docs/badges/android.svg" width="106" height="20" alt="Android 8.0+">
     <img src="docs/badges/kotlin.svg" width="112" height="20" alt="Kotlin">
     <img src="docs/badges/license.svg" width="128" height="20" alt="Apache 2.0">
   </p>
   <p>
-    <a href="https://github.com/RoyCoding8/SplitSmart/releases/tag/v1.0.0"><img src="https://img.shields.io/badge/download-APK-2E7D32?style=for-the-badge" alt="Download APK"></a>
+    <a href="https://github.com/RoyCoding8/SplitSmart/releases/tag/v1.0.1"><img src="https://img.shields.io/badge/download_APK-3.0_MB-2E7D32?style=for-the-badge" alt="Download SplitSmart v1.0.1 APK"></a>
     &nbsp;&nbsp;
     <a href="https://github.com/RoyCoding8/SplitSmart/releases">All releases</a>
     &nbsp;&nbsp;

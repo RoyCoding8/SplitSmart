@@ -1,7 +1,7 @@
 plugins { alias(libs.plugins.agp); alias(libs.plugins.kotlin); alias(libs.plugins.compose); alias(libs.plugins.ksp); alias(libs.plugins.hilt); alias(libs.plugins.serialization) }
 android {
     namespace = "com.splitsmart"; compileSdk = libs.versions.compileSdk.get().toInt()
-    defaultConfig { applicationId = "com.splitsmart"; minSdk = libs.versions.minSdk.get().toInt(); targetSdk = libs.versions.targetSdk.get().toInt(); versionCode = 1; versionName = "1.0.0"
+    defaultConfig { applicationId = "com.splitsmart"; minSdk = libs.versions.minSdk.get().toInt(); targetSdk = libs.versions.targetSdk.get().toInt(); versionCode = 2; versionName = "1.0.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
     val releaseStoreFile = project.findProperty("SPLITSMART_STORE_FILE") as String?
     signingConfigs {

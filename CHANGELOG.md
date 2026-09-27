@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.1 (2026-09-27)
+
+- Enable R8 code shrinking and resource shrinking on release builds
+- Keep Room type converter and backup export enum names from being obfuscated,
+  so stored categories and group kinds survive a build intact
+- The release APK drops from 15.4 MB to 3.0 MB
+
 ## 1.0.0 (2026-09-25)
 
 First release.

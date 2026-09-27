@@ -1,0 +1,1 @@
+Enable R8 code shrinking and resource shrinking on release builds, and keep the Room type converter and backup export enum names from being obfuscated. The APK drops from 15.4 MB to 3.0 MB. Verified on an emulator: groups, expenses, split shares and the widget all round-trip correctly.
