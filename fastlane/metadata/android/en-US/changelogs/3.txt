@@ -1,0 +1,1 @@
+Remove the unnecessary Android network-state permission inherited from WorkManager. The app remains offline; recurring expenses and reminders remain enabled.

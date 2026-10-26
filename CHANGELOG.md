@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.2 (2026-10-26)
+
+- Exclude the unnecessary `ACCESS_NETWORK_STATE` permission inherited from AndroidX WorkManager.
+- Preserve offline recurring expenses and background reminders.
+
 ## 1.0.1 (2026-09-27)
 
 - Enable R8 code shrinking and resource shrinking on release builds
