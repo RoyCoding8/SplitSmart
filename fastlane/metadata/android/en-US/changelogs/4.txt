@@ -1,0 +1,1 @@
+Expand the expense members list into a scrollable sheet for easier editing on smaller phones. Keep the existing expense form and split controls unchanged.

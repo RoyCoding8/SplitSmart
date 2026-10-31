@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.3 (2026-10-30)
+
+- Add an expandable, scrollable member picker to the expense editor for smaller screens.
+- Add a manual GitHub Actions debug APK build for testing without publishing a release.
+
 ## 1.0.2 (2026-10-26)
 
 - Exclude the unnecessary `ACCESS_NETWORK_STATE` permission inherited from AndroidX WorkManager.
