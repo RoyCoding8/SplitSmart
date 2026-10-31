@@ -30,6 +30,8 @@ compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeB
 compose-ui = { module = "androidx.compose.ui:ui" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
 compose-icons = { module = "androidx.compose.material:material-icons-extended" }
+compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
+compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 window-size = { module = "androidx.compose.material3:material3-window-size-class" }
 navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }
 hilt = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }

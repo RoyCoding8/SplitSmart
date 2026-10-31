@@ -40,6 +40,7 @@ dependencies {
     implementation(libs.glance.appwidget); implementation(libs.glance.material3); implementation(libs.coil.compose)
     testImplementation(libs.junit5); testImplementation(libs.junit.vintage); testImplementation(libs.coroutines.test); testImplementation(libs.turbine)
     testImplementation(libs.truth); testImplementation(libs.robolectric); testImplementation(libs.room.testing)
-    testImplementation(libs.test.core)
+    testImplementation(libs.test.core); testImplementation(libs.compose.ui.test.junit4)
+    debugImplementation(libs.compose.ui.test.manifest)
 }
 tasks.withType<Test> { useJUnitPlatform() }
