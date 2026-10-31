@@ -7,6 +7,8 @@ import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -147,6 +149,7 @@ private class LongMapField(
   }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpenseEditorScreen(
     gid: Long,
@@ -591,41 +594,13 @@ fun ExpenseEditorScreen(
                       label = { Text(t.name.lowercase().replaceFirstChar { it.uppercase() }) })
                 }
               }
+          ExpenseMembersPicker(rows, itemized, type, preview, cur) { touch("rows") }
           LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             items(rows, key = { it.id }) { r ->
-              // In itemized mode the per-row number is the participant's own item
-              // subtotal; outside it, a percent or shares split enters its own basis.
-              // Same field, so one branch picks the label.
-              val rowLabel =
-                  when {
-                    itemized -> "items"
-                    type == SplitType.PERCENT -> "%"
-                    type != SplitType.EQUAL -> "amt"
-                    else -> null
+              ExpenseMemberRow(
+                  r, itemized, type, preview?.get(r.id)?.let { money(it, cur) } ?: "") {
+                    touch("rows")
                   }
-              Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Checkbox(
-                    r.included,
-                    {
-                      r.included = it
-                      touch("rows")
-                    })
-                Text(r.name, modifier = Modifier.weight(1f).padding(top = 12.dp))
-                if (rowLabel != null)
-                    OutlinedTextField(
-                        r.text,
-                        {
-                          r.text = it
-                          touch("rows")
-                        },
-                        label = { Text(rowLabel) },
-                        singleLine = true,
-                        modifier = Modifier.width(110.dp))
-                else
-                    Text(
-                        preview?.get(r.id)?.let { money(it, cur) } ?: "",
-                        modifier = Modifier.padding(top = 12.dp))
-              }
             }
           }
           // In itemized mode the check keys off the rows having entries at all, not off
@@ -718,5 +693,83 @@ fun ExpenseEditorScreen(
               singleLine = true,
               modifier = Modifier.fillMaxWidth())
         }
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun ExpenseMembersPicker(
+    rows: List<SplitRow>,
+    itemized: Boolean,
+    type: SplitType,
+    preview: Map<Long, Long>?,
+    currency: String,
+    onChanged: () -> Unit
+) {
+  var expanded by rememberSaveable { mutableStateOf(false) }
+  Row(
+      modifier = Modifier.fillMaxWidth(),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.SpaceBetween) {
+        Text("Members", style = MaterialTheme.typography.labelLarge)
+        IconButton(onClick = { expanded = true }) {
+          Icon(Icons.Default.OpenInFull, contentDescription = "Expand members")
+        }
+      }
+  if (expanded) {
+    ModalBottomSheet(
+        onDismissRequest = { expanded = false },
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+          Column(
+              Modifier.fillMaxWidth().fillMaxHeight(0.9f).padding(horizontal = 16.dp),
+              verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween) {
+                  Text("Split members", style = MaterialTheme.typography.titleLarge)
+                  TextButton(onClick = { expanded = false }) { Text("Done") }
+                }
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                  items(rows, key = { it.id }) { r ->
+                    ExpenseMemberRow(
+                        r, itemized, type, preview?.get(r.id)?.let { money(it, currency) } ?: "") {
+                          onChanged()
+                        }
+                  }
+                }
+          }
+        }
+  }
+}
+
+@Composable
+private fun ExpenseMemberRow(
+    row: SplitRow,
+    itemized: Boolean,
+    type: SplitType,
+    previewAmount: String,
+    onChanged: () -> Unit
+) {
+  val rowLabel =
+      when {
+        itemized -> "items"
+        type == SplitType.PERCENT -> "%"
+        type != SplitType.EQUAL -> "amt"
+        else -> null
+      }
+  Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Checkbox(row.included, { row.included = it; onChanged() })
+    Text(row.name, modifier = Modifier.weight(1f).padding(top = 12.dp))
+    if (rowLabel != null)
+        OutlinedTextField(
+            row.text,
+            { row.text = it; onChanged() },
+            label = { Text(rowLabel) },
+            singleLine = true,
+            modifier = Modifier.width(110.dp))
+    else Text(previewAmount, modifier = Modifier.padding(top = 12.dp))
   }
 }
