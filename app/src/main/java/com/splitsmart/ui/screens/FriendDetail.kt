@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -20,6 +21,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.splitsmart.core.settle.Transfer
 import com.splitsmart.data.ExpenseBundle
+import com.splitsmart.data.FxRate
+import com.splitsmart.data.parseRate
+import com.splitsmart.data.rateLine
 import com.splitsmart.data.unpricedNote
 import com.splitsmart.ui.shell.ChildShell
 import com.splitsmart.ui.vm.GroupDetailVm
@@ -54,6 +58,7 @@ fun FriendDetailScreen(
   var settleErr by remember { mutableStateOf<String?>(null) }
   var settling by remember { mutableStateOf(false) }
   var share by remember { mutableStateOf(false) }
+  var rateOpen by rememberSaveable { mutableStateOf(false) }
   var detailOf by remember { mutableStateOf<ExpenseBundle?>(null) }
   val cur = g?.currencyCode ?: ""
   val self = g?.selfMemberId
@@ -140,6 +145,39 @@ fun FriendDetailScreen(
                   }
             }
           }
+          item {
+            ElevatedCard(Modifier.fillMaxWidth()) {
+              Column(
+                  Modifier.padding(12.dp),
+                  verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                  Text(
+                      "Currency rates (manual)",
+                      modifier = Modifier.weight(1f),
+                      style = MaterialTheme.typography.titleSmall)
+                  TextButton(onClick = { rateOpen = true }) { Text("+ Add") }
+                }
+                if (rates.isEmpty())
+                    Text(
+                        "Add a rate to convert expenses in other currencies into $cur.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                rates.forEach { r ->
+                  Row(
+                      modifier = Modifier.fillMaxWidth(),
+                      verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        rateLine(r),
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.bodyMedium)
+                    IconButton(onClick = { vm.deleteRate(r.id) }) {
+                      Icon(Icons.Default.Delete, "Delete rate")
+                    }
+                  }
+                }
+              }
+            }
+          }
           if (friend != null)
               item {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -168,6 +206,79 @@ fun FriendDetailScreen(
             HorizontalDivider()
           }
         }
+  }
+  if (rateOpen) {
+    var from by remember { mutableStateOf("") }
+    var to by remember(cur) { mutableStateOf(cur) }
+    var rate by remember { mutableStateOf("") }
+    var rateErr by remember { mutableStateOf<String?>(null) }
+    var savingRate by remember { mutableStateOf(false) }
+    AlertDialog(
+        onDismissRequest = { if (!savingRate) rateOpen = false },
+        title = { Text("Add rate") },
+        text = {
+          Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                "1 unit of currency A = ? units of currency B.",
+                style = MaterialTheme.typography.bodySmall)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+              OutlinedTextField(
+                  from,
+                  { from = it.uppercase().take(3); rateErr = null },
+                  label = { Text("From") },
+                  singleLine = true,
+                  modifier = Modifier.weight(1f))
+              OutlinedTextField(
+                  to,
+                  { to = it.uppercase().take(3); rateErr = null },
+                  label = { Text("To") },
+                  singleLine = true,
+                  modifier = Modifier.weight(1f))
+            }
+            OutlinedTextField(
+                rate,
+                { rate = it; rateErr = null },
+                label = { Text("Rate") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth())
+            rateErr?.let {
+              Text(it, color = MaterialTheme.colorScheme.error,
+                  style = MaterialTheme.typography.bodySmall)
+            }
+          }
+        },
+        confirmButton = {
+          TextButton(
+              enabled = !savingRate,
+              onClick = {
+                val parsed = parseRate(rate)
+                rateErr =
+                    when {
+                      from.length != 3 || to.length != 3 -> "Enter two 3-letter codes."
+                      from == to -> "Choose two different currencies."
+                      parsed == null -> "Enter a positive rate."
+                      else -> null
+                    }
+                if (rateErr == null && parsed != null) {
+                  savingRate = true
+                  scope.launch {
+                    val problem =
+                        vm.saveRate(
+                            FxRate(
+                                groupId = gid,
+                                fromCode = from,
+                                toCode = to,
+                                rate = parsed,
+                                timeEpoch = System.currentTimeMillis()))
+                    savingRate = false
+                    if (problem == null) rateOpen = false else rateErr = problem
+                  }
+                }
+              }) { Text("Save") }
+        },
+        dismissButton = {
+          TextButton(enabled = !savingRate, onClick = { rateOpen = false }) { Text("Cancel") }
+        })
   }
   settleOf?.let { (f, t, a) ->
     SettleDialog(
