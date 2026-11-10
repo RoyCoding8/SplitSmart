@@ -100,6 +100,8 @@ fun GroupDetailScreen(
   val nets by vm.nets.collectAsStateWithLifecycle()
   val subgroups by vm.subgroups.collectAsStateWithLifecycle()
   val rates by vm.rates.collectAsStateWithLifecycle()
+  val localRates by vm.localRates.collectAsStateWithLifecycle()
+  val sharedRates by vm.sharedRates.collectAsStateWithLifecycle()
   val native by vm.netsNative.collectAsStateWithLifecycle()
   val customs by vm.customs.collectAsStateWithLifecycle()
   val customMap = remember(customs) { customs.associateBy { it.id } }
@@ -385,12 +387,25 @@ fun GroupDetailScreen(
                                     modifier = Modifier.weight(1f))
                                 TextButton(onClick = { rateOpen = true }) { Text("+ Add") }
                               }
-                              if (rates.isEmpty())
+                              Text(
+                                  "New rates are shared with all friends and groups. Existing group-only rates take priority.",
+                                  style = MaterialTheme.typography.bodySmall,
+                                  color = MaterialTheme.colorScheme.onSurfaceVariant)
+                              if (localRates.isEmpty() && sharedRates.isEmpty())
                                   Text(
-                                      "No rates yet. Foreign expenses count 1:1 until you add one.",
+                                      "No rates yet. Add one here or in Settings.",
                                       style = MaterialTheme.typography.bodySmall,
                                       color = MaterialTheme.colorScheme.onSurfaceVariant)
-                              rates.forEach { r ->
+                              sharedRates.forEach { r ->
+                                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                  Text("App-wide · ${rateLine(r)}", modifier = Modifier.weight(1f),
+                                      style = MaterialTheme.typography.bodyMedium)
+                                  IconButton(onClick = { vm.deleteSharedRate(r.fromCode, r.toCode) }) {
+                                    Icon(Icons.Default.Delete, "Delete shared rate")
+                                  }
+                                }
+                              }
+                              localRates.forEach { r ->
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier.fillMaxWidth()) {
@@ -705,7 +720,7 @@ fun GroupDetailScreen(
     var err by remember { mutableStateOf<String?>(null) }
     AlertDialog(
         onDismissRequest = { rateOpen = false },
-        title = { Text("Add rate") },
+        title = { Text("Add app-wide rate") },
         text = {
           Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(

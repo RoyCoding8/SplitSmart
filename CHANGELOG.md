@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.4 (2026-11-10)
+
+- Add app-wide manual currency conversion rates for friends and groups, with group-specific overrides.
+- Add archive, unarchive, and delete actions for friends.
+- Improve the expense editor's scrolling and Notes field on smaller screens.
+
 ## 1.0.3 (2026-10-30)
 
 - Add an expandable, scrollable member picker to the expense editor for smaller screens.

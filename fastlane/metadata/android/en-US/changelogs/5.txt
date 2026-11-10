@@ -1,0 +1,1 @@
+Add app-wide manual currency rates, friend archive and delete actions, and improve expense editor scrolling and note visibility on smaller screens.

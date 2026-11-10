@@ -47,6 +47,12 @@ constructor(
           }
           .getOrElse { it.message }
 
+  suspend fun saveGlobalRate(from: String, to: String, rate: Double): String? =
+      runCatching { prefs.saveGlobalRate(from, to, rate) }.exceptionOrNull()?.message
+
+  suspend fun deleteGlobalRate(from: String, to: String): String? =
+      runCatching { prefs.deleteGlobalRate(from, to) }.exceptionOrNull()?.message
+
   fun setThemeMode(m: ThemeMode) = viewModelScope.launch { prefs.setThemeMode(m) }
 
   fun setDynamicColor(b: Boolean) = viewModelScope.launch { prefs.setDynamicColor(b) }

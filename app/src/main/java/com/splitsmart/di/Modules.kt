@@ -33,6 +33,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.collect
 
 val Context.store by preferencesDataStore("settings")
 
@@ -57,7 +61,7 @@ object Modules {
               MIGRATION_11_12)
           .build()
 
-  @Provides @Singleton fun repo(db: AppDatabase) = SplitRepository(db)
+  @Provides @Singleton fun repo(db: AppDatabase, prefs: SettingsPrefsStore) = SplitRepository(db, prefs)
 
   /**
    * The balance widget has no update period, so it would otherwise show whatever it
@@ -77,7 +81,8 @@ object Modules {
   @Singleton
   fun watchWidget(
       db: AppDatabase,
-      @ApplicationContext c: Context
+      @ApplicationContext c: Context,
+      prefs: SettingsPrefsStore
   ): Closeable {
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     var pending: Job? = null
@@ -96,6 +101,12 @@ object Modules {
           }
         }
     db.invalidationTracker.addObserver(observer)
+    // Changing an app-wide rate changes balances without writing a Room table.
+    scope.launch {
+      prefs.flow.map { it.globalRates }.distinctUntilChanged().drop(1).collect {
+        BalanceWidget().refreshAll(c)
+      }
+    }
     return Closeable {
       db.invalidationTracker.removeObserver(observer)
       scope.cancel()

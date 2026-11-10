@@ -112,6 +112,38 @@ class FxTest {
         .isEqualTo("1 EUR = 1.1 USD")
   }
 
+  @Test
+  fun `a shared rate converts expenses for both friends and groups`() {
+    val shared = listOf(AppFxRate("EUR", "USD", 1.2, 100L))
+    val groupRates = effectiveFxRates(emptyList(), shared, 1L)
+    val friendRates = effectiveFxRates(emptyList(), shared, 2L)
+    assertThat(totalIn(listOf(ex("EUR")), "USD", groupRates)).isEqualTo(6000L)
+    assertThat(totalIn(listOf(ex("EUR")), "USD", friendRates)).isEqualTo(6000L)
+    assertThat(unconvertibleCurrencies(listOf(ex("EUR")), "USD", groupRates)).isEmpty()
+  }
+
+  @Test
+  fun `group rates override shared quotes in either direction`() {
+    val shared = listOf(AppFxRate("EUR", "USD", 1.2, 100L))
+    val local = listOf(FxRate(groupId = 1, fromCode = "USD", toCode = "EUR",
+                            rate = 0.5, timeEpoch = 200L))
+    val groupRates = effectiveFxRates(local, shared, 1L)
+    val friendRates = effectiveFxRates(emptyList(), shared, 2L)
+    assertThat(groupRates).hasSize(1)
+    assertThat(pickRate(groupRates, "EUR", "USD", 1000L)).isEqualTo(2.0)
+    assertThat(pickRate(friendRates, "EUR", "USD", 1000L)).isEqualTo(1.2)
+  }
+
+  @Test
+  fun `unrelated local rates do not block app-wide conversion`() {
+    val shared = listOf(AppFxRate("EUR", "USD", 1.2, 100L))
+    val local = listOf(FxRate(groupId = 1, fromCode = "GBP", toCode = "USD",
+                            rate = 1.4, timeEpoch = 200L))
+    val rates = effectiveFxRates(local, shared, 1L)
+    assertThat(rates).hasSize(2)
+    assertThat(pickRate(rates, "EUR", "USD", 1000L)).isEqualTo(1.2)
+  }
+
   private fun ex(cur: String, at: Long = 1000) =
       Expense(
           groupId = 1,
