@@ -81,7 +81,7 @@ data class ExpenseBundle(
     val items: List<ExpenseItem>
 )
 
-open class SplitRepository(private val db: AppDatabase) {
+open class SplitRepository(private val db: AppDatabase, private val prefs: SettingsPrefsStore? = null) {
   private val g = db.groups()
   private val m = db.members()
   private val e = db.expenses()
@@ -233,7 +233,15 @@ open class SplitRepository(private val db: AppDatabase) {
     }
   }
 
-  fun rates(gid: Long) = db.rates().rates(gid)
+  fun localRates(gid: Long) = db.rates().rates(gid)
+
+  /** Shared settings rates affect every balance, settlement, dashboard and friend total. */
+  fun rates(gid: Long): Flow<List<FxRate>> =
+      prefs?.let { settings ->
+        combine(localRates(gid), settings.flow) { local, p ->
+          effectiveFxRates(local, p.globalRates, gid)
+        }
+      } ?: localRates(gid)
 
   suspend fun saveRate(r: FxRate): Long {
     val f = r.fromCode.uppercase()

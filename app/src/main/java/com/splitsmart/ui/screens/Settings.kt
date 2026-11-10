@@ -46,6 +46,7 @@ import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.splitsmart.data.CustomCategory
+import com.splitsmart.data.parseRate
 import com.splitsmart.data.ThemeMode
 import com.splitsmart.ui.shell.DrawerDest
 import com.splitsmart.ui.shell.TopLevelShell
@@ -70,6 +71,11 @@ fun SettingsScreen(
   val snackbar = remember { SnackbarHostState() }
   var currency by rememberSaveable(prefs.defaultCurrency) { mutableStateOf(prefs.defaultCurrency) }
   var msg by remember { mutableStateOf<String?>(null) }
+  var fxFrom by rememberSaveable { mutableStateOf("") }
+  var fxTo by rememberSaveable { mutableStateOf("") }
+  var fxValue by rememberSaveable { mutableStateOf("") }
+  var fxErr by remember { mutableStateOf<String?>(null) }
+  var savingFx by remember { mutableStateOf(false) }
   // Read from the system, not from the stored preference: the preference says the
   // user asked for reminders, the system decides whether any can be delivered.
   fun canPostNotifications(): Boolean =
@@ -203,6 +209,87 @@ fun SettingsScreen(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.error)
                       }
+                }
+                item { SectionTitle("Currency conversion (app-wide)") }
+                item {
+                  Text(
+                      "Manual rates work offline for all friends and groups. Existing group-specific rates override shared rates for that currency pair.",
+                      style = MaterialTheme.typography.bodySmall,
+                      color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                prefs.globalRates.forEach { r ->
+                  item {
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically) {
+                      Text(
+                          "1 ${r.fromCode} = ${r.rate} ${r.toCode}",
+                          modifier = Modifier.weight(1f))
+                      IconButton(onClick = {
+                        scope.launch {
+                          vm.deleteGlobalRate(r.fromCode, r.toCode)?.let {
+                            snackbar.showSnackbar(it)
+                          }
+                        }
+                      }) { Icon(Icons.Default.Delete, "Delete shared rate ${r.fromCode} to ${r.toCode}") }
+                    }
+                  }
+                }
+                item {
+                  Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        fxFrom,
+                        { fxFrom = it.uppercase().take(3); fxErr = null },
+                        label = { Text("From") },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f))
+                    OutlinedTextField(
+                        fxTo,
+                        { fxTo = it.uppercase().take(3); fxErr = null },
+                        label = { Text("To") },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f))
+                  }
+                }
+                item {
+                  Row(
+                      horizontalArrangement = Arrangement.spacedBy(8.dp),
+                      verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedTextField(
+                        fxValue,
+                        { fxValue = it; fxErr = null },
+                        label = { Text("Rate") },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f))
+                    TextButton(
+                        enabled = !savingFx,
+                        onClick = {
+                          val parsed = parseRate(fxValue)
+                          fxErr =
+                              when {
+                                fxFrom.length != 3 || fxTo.length != 3 || fxFrom == fxTo ->
+                                    "Enter two different 3-letter currencies."
+                                parsed == null -> "Enter a positive rate."
+                                else -> null
+                              }
+                          if (fxErr == null && parsed != null) {
+                            savingFx = true
+                            scope.launch {
+                              val problem = vm.saveGlobalRate(fxFrom, fxTo, parsed)
+                              savingFx = false
+                              if (problem == null) {
+                                fxFrom = ""
+                                fxTo = ""
+                                fxValue = ""
+                              } else fxErr = problem
+                            }
+                          }
+                        }) { Text("Save rate") }
+                  }
+                  fxErr?.let {
+                    Text(it, color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall)
+                  }
                 }
                 item { SectionTitle("Notifications") }
                 item {

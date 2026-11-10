@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.listSaver
@@ -418,7 +419,7 @@ fun ExpenseEditorScreen(
       actions = { TextButton(onClick = doSave, enabled = canSave && !saving) { Text("Save") } },
   ) { p ->
     Column(
-        Modifier.fillMaxSize().padding(p).padding(16.dp),
+        Modifier.fillMaxSize().padding(p).imePadding().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)) {
           Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (itemized) {
@@ -595,8 +596,8 @@ fun ExpenseEditorScreen(
                 }
               }
           ExpenseMembersPicker(rows, itemized, type, preview, cur) { touch("rows") }
-          LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            items(rows, key = { it.id }) { r ->
+          Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            rows.forEach { r ->
               ExpenseMemberRow(
                   r, itemized, type, preview?.get(r.id)?.let { money(it, cur) } ?: "") {
                     touch("rows")
@@ -690,7 +691,8 @@ fun ExpenseEditorScreen(
                 touch("note")
               },
               label = { Text("Note (optional)") },
-              singleLine = true,
+              minLines = 2,
+              maxLines = 4,
               modifier = Modifier.fillMaxWidth())
         }
   }

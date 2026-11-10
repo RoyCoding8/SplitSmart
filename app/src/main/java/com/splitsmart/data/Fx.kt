@@ -95,11 +95,33 @@ fun unpricedNote(unpriced: List<String>): String =
         "No rate${if (unpriced.size == 1) "" else "s"} entered for ${unpriced.joinToString(" and ")}" +
             ", so this figure is not converted"
 
+/**
+ * App-wide rates supply a default for every group and friend. Any local quote for a
+ * currency pair (including the reverse direction) takes priority over the shared quote.
+ * Keep group-specific history intact; the shared quote has no Room id to delete here.
+ */
+fun effectiveFxRates(local: List<FxRate>, shared: List<AppFxRate>, groupId: Long): List<FxRate> {
+  val overridden = local.map { setOf(it.fromCode.uppercase(), it.toCode.uppercase()) }.toSet()
+  return local + shared
+      .filterNot { setOf(it.fromCode.uppercase(), it.toCode.uppercase()) in overridden }
+      .map {
+        FxRate(
+            groupId = groupId,
+            fromCode = it.fromCode,
+            toCode = it.toCode,
+            rate = it.rate,
+            timeEpoch = it.timeEpoch)
+      }
+}
+
 /** Sums expenses converted into [target] currency. */
 fun totalIn(expenses: List<Expense>, target: String, rates: List<FxRate>): Long =
     expenses.sumOf {
       convertMinor(it.amountMinor, pickRate(rates, it.currencyCode, target, it.dateEpoch))
     }
+
+fun rateLine(r: AppFxRate): String =
+    "1 ${r.fromCode} = ${BigDecimal(r.rate.toString()).stripTrailingZeros().toPlainString()} ${r.toCode}"
 
 fun rateLine(r: FxRate): String =
     "1 ${r.fromCode} = ${BigDecimal(r.rate.toString()).stripTrailingZeros().toPlainString()} ${r.toCode}"

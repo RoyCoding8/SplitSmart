@@ -259,6 +259,10 @@ constructor(
 
   val nets: StateFlow<Map<Long, Long>> = watching(emptyMap()) { repo.nets(it) }
   val rates: StateFlow<List<FxRate>> = watching(emptyList()) { repo.rates(it) }
+  val localRates: StateFlow<List<FxRate>> = watching(emptyList()) { repo.localRates(it) }
+  val sharedRates: StateFlow<List<AppFxRate>> =
+      prefs.flow.map { it.globalRates }
+          .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   /**
    * The plan is derived from expenses, settlements and rates, so all three
@@ -281,10 +285,16 @@ constructor(
           .exceptionOrNull()
           ?.message
 
+  /** New rates are shared across groups and friends; old group-only quotes remain as overrides. */
   suspend fun saveRate(r: FxRate): String? =
-      runCatching { withContext(NonCancellable) { repo.saveRate(r.copy(groupId = gid.value)) } }
-          .exceptionOrNull()
-          ?.message
+      runCatching {
+        withContext(NonCancellable) {
+          prefs.saveGlobalRate(r.fromCode, r.toCode, r.rate)
+        }
+      }.exceptionOrNull()?.message
+
+  fun deleteSharedRate(from: String, to: String) =
+      viewModelScope.launch { withContext(NonCancellable) { prefs.deleteGlobalRate(from, to) } }
 
   fun deleteRate(id: Long) =
       viewModelScope.launch { withContext(NonCancellable) { repo.deleteRate(id) } }

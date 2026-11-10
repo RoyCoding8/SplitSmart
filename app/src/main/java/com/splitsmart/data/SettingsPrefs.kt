@@ -9,6 +9,9 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 enum class ThemeMode {
   SYSTEM,
@@ -16,11 +19,16 @@ enum class ThemeMode {
   DARK
 }
 
+/** A manual conversion rate shared by every friend and group. */
+@Serializable
+data class AppFxRate(val fromCode: String, val toCode: String, val rate: Double, val timeEpoch: Long)
+
 data class SettingsPrefs(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val dynamicColor: Boolean = true,
     val defaultCurrency: String = "USD",
     val billNotifs: Boolean = true,
+    val globalRates: List<AppFxRate> = emptyList(),
 )
 
 class SettingsPrefsStore(private val store: DataStore<Preferences>) {
@@ -28,6 +36,7 @@ class SettingsPrefsStore(private val store: DataStore<Preferences>) {
   private val dynamicKey = booleanPreferencesKey("ui_dynamic")
   private val currencyKey = stringPreferencesKey("default_currency")
   private val notifKey = booleanPreferencesKey("bill_notifs")
+  private val globalRatesKey = stringPreferencesKey("global_fx_rates_v1")
   private val lastGroupKey = longPreferencesKey("last_group_id")
 
   val lastGroupId: Flow<Long> = store.data.map { it[lastGroupKey] ?: -1L }.catch { emit(-1L) }
@@ -43,6 +52,7 @@ class SettingsPrefsStore(private val store: DataStore<Preferences>) {
                 defaultCurrency =
                     (p[currencyKey] ?: "USD").uppercase().takeIf { it.length == 3 } ?: "USD",
                 billNotifs = p[notifKey] ?: true,
+                globalRates = readGlobalRates(p[globalRatesKey]),
             )
           }
           .catch { emit(SettingsPrefs()) }
@@ -59,6 +69,44 @@ class SettingsPrefsStore(private val store: DataStore<Preferences>) {
     val v = code.trim().uppercase().take(3)
     require(v.length == 3) { "currency must be 3 letters" }
     store.edit { it[currencyKey] = v }
+  }
+
+  private fun readGlobalRates(raw: String?): List<AppFxRate> =
+      runCatching { Json.decodeFromString<List<AppFxRate>>(raw ?: "[]") }
+          .getOrDefault(emptyList())
+          .filter { r ->
+            r.fromCode.length == 3 && r.toCode.length == 3 &&
+                r.fromCode != r.toCode && r.rate.isFinite() && r.rate > 0
+          }
+
+  /** Replaces a currency pair's shared rate; never changes any group-specific rates. */
+  suspend fun saveGlobalRate(from: String, to: String, rate: Double) {
+    val f = from.trim().uppercase()
+    val t = to.trim().uppercase()
+    require(f.length == 3 && t.length == 3 && f != t && f.all(Char::isLetter) &&
+        t.all(Char::isLetter)) { "Enter two different 3-letter currency codes." }
+    require(rate.isFinite() && rate > 0) { "Enter a positive rate." }
+    store.edit { p ->
+      val existing = readGlobalRates(p[globalRatesKey])
+      val newRate = AppFxRate(f, t, rate, System.currentTimeMillis())
+      // An inverse quote is for the same pair: keep only the new quote so conversion
+      // never depends on which direction was entered first.
+      p[globalRatesKey] =
+          Json.encodeToString(
+              existing.filterNot {
+                (it.fromCode == f && it.toCode == t) ||
+                    (it.fromCode == t && it.toCode == f)
+              } + newRate)
+    }
+  }
+
+  suspend fun deleteGlobalRate(from: String, to: String) {
+    store.edit { p ->
+      p[globalRatesKey] =
+          Json.encodeToString(
+              readGlobalRates(p[globalRatesKey])
+                  .filterNot { it.fromCode == from && it.toCode == to })
+    }
   }
 
   suspend fun setBillNotifs(b: Boolean) {
