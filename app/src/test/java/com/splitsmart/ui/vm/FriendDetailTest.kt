@@ -3,6 +3,7 @@ package com.splitsmart.ui.vm
 import com.google.common.truth.Truth.assertThat
 import com.splitsmart.data.Category
 import com.splitsmart.data.Expense
+import com.splitsmart.data.FxRate
 import org.junit.jupiter.api.Test
 
 class FriendDetailTest {
@@ -39,4 +40,28 @@ class FriendDetailTest {
     assertThat(settleTriple(-500, 7, 9)).isEqualTo(Triple(7L, 9L, 500L))
     assertThat(settleTriple(0, 7, 9)).isNull()
   }
+  @Test
+  fun `friend expenses use entered currency rates for totals`() {
+    val foreign =
+        ex(1, 7, 10000).copy(currencyCode = "EUR")
+    val rate =
+        FxRate(
+            groupId = 1,
+            fromCode = "EUR",
+            toCode = "USD",
+            rate = 1.2,
+            timeEpoch = 0)
+    val totals = friendTotalsIn(listOf(foreign), 7, "USD", listOf(rate))
+    assertThat(totals.paidBySelf).isEqualTo(12000L)
+    assertThat(totals.paidByFriend).isEqualTo(0L)
+    assertThat(totals.unpriced).isEmpty()
+  }
+
+  @Test
+  fun `friend expenses without rates remain flagged as unpriced`() {
+    val foreign = ex(1, 9, 10000).copy(currencyCode = "EUR")
+    val totals = friendTotalsIn(listOf(foreign), 7, "USD", emptyList())
+    assertThat(totals.unpriced).containsExactly("EUR")
+  }
+
 }
